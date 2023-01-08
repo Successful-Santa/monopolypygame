@@ -9,7 +9,7 @@ screen = pygame.display.set_mode((1500, 750))  # create screen (width,height)
 running = True
 
 
-class Player:
+class Player:                     #this is for easy access and shotening the code
     def __init__(
         self,
         name,
@@ -43,7 +43,7 @@ class Player:
         self.total_pos = total_pos
 
 
-# position
+# boardposition:[positionx,positiony ]
 positions = {
     0: [645, 650],
     1: [587, 650],
@@ -86,7 +86,7 @@ positions = {
     38: [645, 534],
     39: [645, 592],
 }
-# assets
+# assets and their values
 assets = {
     1: ["old kent road.png", 60, 30, 33, 2, 4, 10, 30, 90, 160, 250, 50],
     3: ["whitechapel road.png", 60, 30, 33, 4, 8, 20, 60, 180, 320, 450, 50],
@@ -121,6 +121,7 @@ railroads = {
 
 company = {12: ["electric company.png", 150, 75, 85], 28: ["water.png", 150, 75, 85]}
 
+#rgb values of these colours[R,G,B]
 red = [255, 0, 0]
 green = [0, 255, 0]
 blue = [0, 0, 255]
@@ -134,6 +135,7 @@ def place_player(player):
 cas = [12, 28]
 sas = [5, 15, 25, 35]
 
+#assigning player their values
 players = [
     Player(1, 645, 650, 0, "hat.png", red),
     Player(2, 675, 650, 0, "duck.png", blue),
@@ -151,21 +153,21 @@ background = pygame.image.load("monopoly2.png")
 
 font1 = pygame.font.SysFont("comicsans", 25)
 
-
+#for printing a message.msg1 is text and j,k are x and y coordinates respectively colour 0,0,0 indicates black
 def playermsg(msg1, j, k, color=[0, 0, 0]):
     msg = font1.render(msg1, True, (color))
     screen.blit(msg, (j, k))
 
-
+#what happens after pressing y key on keyboard to buy something.it first subtracts cost (ignore turemoney)of the respective property then adds the property to the list of property owned by the player 
 def ykey(player, assets):
     if player.position in assets:
         players[turn - 1].money -= assets[players[turn - 1].position][1]
-        players[turn - 1].money -= assets[players[turn - 1].position][2]
+        players[turn - 1].truemoney -= assets[players[turn - 1].position][2]
         props_owned = list(players[turn - 1].properties_owned)
         props_owned.append(players[turn - 1].position)
         players[turn - 1].properties_owned = props_owned
 
-
+#this function checks if the property is already owned,if it isnt it blits a white screen containing the property image and texts
 def buy_modal(player, assets):
     global players
     global np
@@ -192,7 +194,7 @@ def buy_modal(player, assets):
             playermsg("Press Y to buy", 200, 400)
             playermsg("Press N to cancel", 200, 460)
 
-
+#this function checks if the property is already owned,if it is then it subtracts the rent and blits a white screen displaying a text msg 
 def rent_modal(player, assets, company, railroads, dice1, dice2):
     global players
     global np
@@ -267,7 +269,7 @@ def rent_modal(player, assets, company, railroads, dice1, dice2):
                         p.truemoney += 50 * owned_by.ns
                 player.np = 1
 
-
+#pick a number and load the  
 def picknumber():
     dice1 = random.randint(1, 6)
     if dice1 == 1:
@@ -282,9 +284,9 @@ def picknumber():
         dic1 = pygame.image.load("d5.png")
     elif dice1 == 6:
         dic1 = pygame.image.load("d6.png")
-    return (dic1, dice1)
+    return (dic1, dice1)# here only dice1 is enough it is a mistake(i m not changing it because the submitted code contains it)
 
-
+#roll mechanism and placing the player 
 def roll(player_idx, q, j, k):  # j=dice 1 xcoordinate q=dice2 xcor k=dice1and2 ycor
     dic1, dice1 = picknumber()
     dic2, dice2 = picknumber()
@@ -304,19 +306,20 @@ def roll(player_idx, q, j, k):  # j=dice 1 xcoordinate q=dice2 xcor k=dice1and2 
     return dice1, dice2
 
 
+#msg to print your turn
 def yourTurnPrint(turn):
     msg2 = font1.render("Your turn", True, (255, 0, 0))
     screen.blit(msg2, (800, 150 * turn))
 
-
+# turn will be 1 initially
 turn = 1
+#these are some variables
 rolln = 0
 q = 1
-
 is_modal_open = False
 
 while running:
-    screen.fill((255, 255, 255))  # RGB
+    screen.fill((255, 255, 255))  # RGB (white)
     screen.blit(background, (0, 0))
 
     playermsg("Player 1", 1000, 150, players[0].color)
@@ -328,24 +331,25 @@ while running:
     playermsg(str(players[1].money), 1000, 340)
     playermsg(str(players[2].money), 1000, 490)
     playermsg(str(players[3].money), 1000, 640)
-
+    
+    # playering
     for i, player in enumerate(players):
         screen.blit(players[i].img, (950, 150 * (i + 1)))
 
     yourTurnPrint(turn)
     if turn == 5:
         turn = 1
-
+    
     if is_modal_open:
         buy_modal(players[turn - 1], assets)
         buy_modal(players[turn - 1], railroads)
         buy_modal(players[turn - 1], company)
         rent_modal(players[turn - 1], assets, railroads, company, dice1, dice2)
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT:# close button
             running = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
+        if event.type == pygame.KEYDOWN: #if a key is pressed 
+            if event.key == pygame.K_SPACE: #space key rolls the dice 
                 rolln += 1
                 if rolln > 1:
                     if dice1 == dice2:
@@ -358,7 +362,7 @@ while running:
                         q = 0
                     is_modal_open = True
                     players[turn - 1].np = 0
-                    if players[turn - 1].position == 30:
+                    if players[turn - 1].position == 30:# jail 
                         players[turn - 1].position = 10
                         players[turn - 1].x = positions[players[turn - 1].position][0]
                         players[turn - 1].y = positions[players[turn - 1].position][1]
@@ -373,10 +377,10 @@ while running:
                     ):  # tax
                         players[turn - 1].money -= 200
                         players[turn - 1].truemoney -= 200
-                    if players[turn - 1].position in [2, 17, 33]:
+                    if players[turn - 1].position in [2, 17, 33]:#gifts
                         players[turn - 1].money += 50
                         players[turn - 1].truemoney += 50
-                    if players[turn - 1].position in [7, 22, 36]:
+                    if players[turn - 1].position in [7, 22, 36]:#tax
                         players[turn - 1].money -= 50
                         players[turn - 1].truemoney -= 50
                     # if players pass go then add 200 to their money
@@ -385,7 +389,7 @@ while running:
                         players[turn - 1].truemoney += 200
                         players[turn - 1].total_pos = players[turn - 1].total_pos % 40
 
-            elif event.key == pygame.K_ESCAPE:
+            elif event.key == pygame.K_ESCAPE:#escape key changes the turn q ensures that one cannot roll twice
                 if q != 1:
                     turn += 1
                     rolln = 0
@@ -403,7 +407,7 @@ while running:
             elif event.key == pygame.K_n:
                 if is_modal_open:
                     is_modal_open = False
-
+    
     for player in players:
         place_player(player)
 
